@@ -16,7 +16,7 @@ struct ContentView: View {
                 .aspectRatio(1, contentMode: .fit)
 
             Text("Hello, world!")
-                .font(.custom("Promo-SemiBold", size: 30))
+                .font(.dsTitle)
         }
         .padding()
     }
