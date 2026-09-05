@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DSCircularProgressView: View {
-    var color: DSColor = .ink
+    var color: DSColor = .black
 
     var body: some View {
         ProgressView()

@@ -13,7 +13,7 @@ enum DSColor: String {
     case backgroundSecondary
     case backgroundSecondaryElevated
     case green
-    case ink
+    case black
     case textPrimary
     case textQuaternary
     case textSecondary
