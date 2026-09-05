@@ -9,6 +9,7 @@ import Foundation
 
 enum DSSpace {
     case none
+    case xs
     case sm
     case md
     case lg
@@ -17,6 +18,7 @@ enum DSSpace {
     var value: CGFloat {
         switch  self {
         case .none: 0
+        case .xs: 4
         case .sm: 12
         case .md: 16
         case .lg: 20

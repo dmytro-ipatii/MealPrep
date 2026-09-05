@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum DSColor: String {
-    case accent
+    case accent = "AccentColor"
     case backgroundPrimary
     case backgroundSecondary
     case backgroundSecondaryElevated
@@ -18,6 +18,7 @@ enum DSColor: String {
     case textQuaternary
     case textSecondary
     case textVibrantPrimary
+    case white
 
     var value: Color {
         Color(self.rawValue, bundle: .main)
