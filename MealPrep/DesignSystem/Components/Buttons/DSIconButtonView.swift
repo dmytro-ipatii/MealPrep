@@ -23,10 +23,7 @@ struct DSIconButtonView: View {
                         .frame(width: 20)
                 }
                 .padding(4)
-                .background(
-                    RoundedRectangle(cornerRadius: DSCornerRadius.full.value)
-                        .fill(DSColor.backgroundSecondary.value)
-                )
+                .dsBackground(color: .backgroundSecondary, radius: .full)
             }
         )
         .disabled(isDisabled)

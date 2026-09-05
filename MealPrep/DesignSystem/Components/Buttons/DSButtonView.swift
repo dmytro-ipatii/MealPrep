@@ -18,8 +18,8 @@ struct DSButtonView: View {
         isDisabled || isLoading
     }
 
-    private var background: Color {
-        isDisabled ? DSColor.backgroundSecondary.value : DSColor.accent.value
+    private var background: DSColor {
+        isDisabled ? DSColor.backgroundSecondary : DSColor.accent
     }
 
     var body: some View {
@@ -29,9 +29,7 @@ struct DSButtonView: View {
                 HStack {
 
                     if isLoading {
-                        ProgressView()
-                            .tint(DSColor.ink.value)
-
+                        DSCircularProgressView()
                     } else {
                         Text(label)
                             .font(.dsBody)
@@ -42,10 +40,7 @@ struct DSButtonView: View {
                 .frame(minHeight: 72)
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, DSSpace.md.value)
-                .background(
-                    RoundedRectangle(cornerRadius: DSCornerRadius.full.value)
-                        .fill(background)
-                )
+                .dsBackground(color: background, radius: .full)
             }
         )
         .disabled(isActionDisabled)
