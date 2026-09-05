@@ -1,0 +1,25 @@
+//
+//  DSColor.swift
+//  MealPrep
+//
+//  Created by Dmytro Ipatii on 05/09/2026.
+//
+
+import SwiftUI
+
+enum DSColor: String {
+    case accent
+    case backgroundPrimary
+    case backgroundSecondary
+    case backgroundSecondaryElevated
+    case green
+    case ink
+    case textPrimary
+    case textQuaternary
+    case textSecondary
+    case textVibrantPrimary
+
+    var value: Color {
+        Color(self.rawValue, bundle: .main)
+    }
+}
