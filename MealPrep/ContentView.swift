@@ -8,9 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var isUserPassedOnboarding: Bool = false
 
     var body: some View {
-        OnboardingFlowView(onComplete: ({}))
+        if isUserPassedOnboarding {
+            WeeklyMealPlanFlowView()
+        } else {
+            OnboardingFlowView(onComplete: ({ isUserPassedOnboarding = true}))
+        }
+
     }
 }
 

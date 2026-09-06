@@ -43,7 +43,7 @@ private struct BedgetSettingInputView: View {
     var range: ClosedRange<Double>
 
     var body: some View {
-        VStack(spacing: DSSpace.xxl.value) {
+        VStack(spacing: DSSpace.xxxl.value) {
 
             VStack(spacing: DSSpace.xxs.value) {
 
