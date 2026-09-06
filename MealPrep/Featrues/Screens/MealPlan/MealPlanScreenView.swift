@@ -33,6 +33,42 @@ struct MealPlanScreenView: View {
             }
 
         }
+        .fullScreenCover(
+            isPresented: $viewModel.isProcessingViewPresent,
+            content: {
+                VStack {
+                    
+                    switch viewModel.processMealPlanState {
+                    case .processing:
+                        MealPlanStateProcessingView()
+                            .interactiveDismissDisabled(true)
+                        
+                    case .complete:
+                        CompletedProcessingMealPlanMessageView(
+                            title: "Meal plan confirmed!",
+                            message: "Your meal plan is ready. Let's take a look at your plan.",
+                            actionLabel: "View plan",
+                            action: {
+                                onComplete()
+                            }
+                        )
+                    .interactiveDismissDisabled(true)
+
+                case .error(let string):
+                        CompletedProcessingMealPlanMessageView(
+                            title: "Something went wrong",
+                            message: string,
+                            actionLabel: "Go back",
+                            action: {
+                                viewModel.closeProcessingView()
+                            }
+                        )
+                }
+
+
+            }
+        })
+
         .padding( DSSpace.lg.value)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(DSColor.backgroundPrimary.value.ignoresSafeArea(.all))
@@ -40,7 +76,8 @@ struct MealPlanScreenView: View {
 }
 
 
-
 #Preview {
+
     MealPlanScreenView(modelManager: ModalManager(), onComplete: ({}))
+
 }
