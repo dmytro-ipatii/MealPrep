@@ -31,12 +31,14 @@
 		321E565E304C107500C8444F /* MealPrep.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MealPrep.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		321E566B304C107700C8444F /* MealPrepTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MealPrepTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		321E5675304C107700C8444F /* MealPrepUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MealPrepUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		321E56A0304C133000C8444F /* MealPrep/Configs/Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MealPrep/Configs/Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		321E5691304C133000C8444F /* Exceptions for "MealPrep" folder in "MealPrep" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Configs/Secrets.xcconfig,
 				Info.plist,
 			);
 			target = 321E565D304C107500C8444F /* MealPrep */;
@@ -97,6 +99,7 @@
 				321E566E304C107700C8444F /* MealPrepTests */,
 				321E5678304C107700C8444F /* MealPrepUITests */,
 				321E565F304C107500C8444F /* Products */,
+				321E56A0304C133000C8444F /* MealPrep/Configs/Secrets.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -412,6 +415,7 @@
 		};
 		321E5680304C107700C8444F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 321E56A0304C133000C8444F /* MealPrep/Configs/Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -450,6 +454,7 @@
 		};
 		321E5681304C107700C8444F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 321E56A0304C133000C8444F /* MealPrep/Configs/Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
