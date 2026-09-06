@@ -15,6 +15,7 @@ enum DSSpace {
     case md
     case lg
     case xl
+    case xxl
 
     var value: CGFloat {
         switch  self {
@@ -25,6 +26,7 @@ enum DSSpace {
         case .md: 16
         case .lg: 20
         case .xl: 32
+        case .xxl: 58
         }
     }
 

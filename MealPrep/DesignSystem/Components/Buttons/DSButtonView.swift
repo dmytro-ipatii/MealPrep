@@ -22,6 +22,10 @@ struct DSButtonView: View {
         isDisabled ? DSColor.backgroundSecondary : DSColor.accent
     }
 
+    private var foreground: Color {
+        isDisabled ? DSColor.textQuaternary.value : DSColor.white.value
+    }
+
     var body: some View {
         Button(
             action: action,
@@ -33,7 +37,7 @@ struct DSButtonView: View {
                     } else {
                         Text(label)
                             .font(.dsBody)
-                            .foregroundStyle(DSColor.white.value)
+                            .foregroundStyle(foreground)
                     }
 
                 }
