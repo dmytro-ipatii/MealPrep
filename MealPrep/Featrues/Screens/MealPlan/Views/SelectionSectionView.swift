@@ -30,7 +30,10 @@ struct SelectionSectionView<Option: SettingsGridProtocol>: View {
         onActionPress: @escaping ( _ : [Option]) -> Void,
     ) {
         self.title = title
-        self.selections = selections
+        // Must go through the projected value: assigning to a @State property
+        // inside init is ignored, which left previously saved selections
+        // showing as unselected when reopening these screens to update a plan.
+        self._selections = State(initialValue: selections)
         self.options = options
         self.actionLabel = actionLabel
         self.onActionPress = onActionPress

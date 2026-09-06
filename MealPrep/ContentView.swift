@@ -18,7 +18,14 @@ struct ContentView: View {
     var body: some View {
         Group {
             if let storedPlan {
-                WeeklyMealPlanFlowView(plan: storedPlan)
+                // Once a plan exists it becomes the app's home: later launches
+                // land here rather than back in onboarding.
+                WeeklyMealPlanFlowView(
+                    plan: storedPlan,
+                    configurationStore: configurationStore,
+                    generator: generator,
+                    mealPlanRepository: mealPlanRepository
+                )
             } else {
                 OnboardingFlowView(
                     configurationStore: configurationStore,

@@ -9,11 +9,13 @@ import SwiftUI
 
 struct WeeklyMealPlanScreenView: View {
     let plan: MealPlan
+    let onUpdatePlan: () -> Void
 
     @State private var selectedDay: WeekDay
 
-    init(plan: MealPlan) {
+    init(plan: MealPlan, onUpdatePlan: @escaping () -> Void = {}) {
         self.plan = plan
+        self.onUpdatePlan = onUpdatePlan
         self.selectedDay = WeekDay(date: .now) ?? .monday
     }
 
@@ -27,6 +29,7 @@ struct WeeklyMealPlanScreenView: View {
                 // Budget
                 BudgetBoxsView(budget: NSDecimalNumber(decimal: plan.totalCost).doubleValue)
 
+                updatePlanButton
             }
             .padding(.horizontal,DSSpace.lg.value)
 
@@ -48,6 +51,11 @@ struct WeeklyMealPlanScreenView: View {
         .background(DSColor.accent.value)
     }
 
+    private var updatePlanButton: some View {
+        DSButtonView(label: "Update meal plan", variant: .secondary, action: onUpdatePlan)
+            .padding(.top, DSSpace.xs.value)
+    }
+
     private var titleView: some View {
         Text("Buon appetit!")
             .font(.dsTitleL)
@@ -57,5 +65,5 @@ struct WeeklyMealPlanScreenView: View {
 }
 
 #Preview {
-    WeeklyMealPlanScreenView(plan: .preview)
+    WeeklyMealPlanScreenView(plan: .preview, onUpdatePlan: {})
 }
