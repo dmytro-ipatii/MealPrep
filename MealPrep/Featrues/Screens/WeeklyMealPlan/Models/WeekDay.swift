@@ -54,4 +54,10 @@ enum WeekDay: CaseIterable, Identifiable, Hashable {
         case .sunday: "Sunday"
         }
     }
+
+    /// Plans are generated as day 0...6 starting Monday, so the picker's day
+    /// maps straight onto `PlanDay.dayIndex`.
+    var dayIndex: Int {
+        Self.allCases.firstIndex(of: self) ?? 0
+    }
 }

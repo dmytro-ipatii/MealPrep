@@ -13,8 +13,19 @@ struct MealPlanScreenView: View {
 
     let onComplete: () -> Void
 
-    init(modelManager: ModalManager, configurationStore: ConfigurationStoring, onComplete: @escaping () -> Void) {
-        self.viewModel = ViewModel(modelManager: modelManager, configurationStore: configurationStore)
+    init(
+        modelManager: ModalManager,
+        configurationStore: ConfigurationStoring,
+        generator: MealPlanGenerator,
+        mealPlanRepository: MealPlanRepositoryProtocol,
+        onComplete: @escaping () -> Void
+    ) {
+        self.viewModel = ViewModel(
+            modelManager: modelManager,
+            configurationStore: configurationStore,
+            generator: generator,
+            mealPlanRepository: mealPlanRepository
+        )
         self.onComplete = onComplete
     }
 
@@ -39,8 +50,8 @@ struct MealPlanScreenView: View {
                 VStack {
                     
                     switch viewModel.processMealPlanState {
-                    case .processing:
-                        MealPlanStateProcessingView()
+                    case .processing(let message):
+                        MealPlanStateProcessingView(message: message)
                             .interactiveDismissDisabled(true)
                         
                     case .complete:
@@ -78,6 +89,12 @@ struct MealPlanScreenView: View {
 
 #Preview {
 
-    MealPlanScreenView(modelManager: ModalManager(), configurationStore: PreviewConfigurationStore(), onComplete: ({}))
+    MealPlanScreenView(
+        modelManager: ModalManager(),
+        configurationStore: PreviewConfigurationStore(),
+        generator: MealPlanGenerator(client: PreviewMealPlanLLMClient()),
+        mealPlanRepository: PreviewMealPlanRepository(),
+        onComplete: ({})
+    )
 
 }

@@ -19,7 +19,7 @@ struct BudgetBoxsView: View {
                 .font(.dsBody)
                 .foregroundStyle(DSColor.textSecondary.value)
 
-            Text("€\(budget.toFormatedString()) / \(perPeriod)")
+            Text("€\(budget.toFormatedString(with: 2)) / \(perPeriod)")
                 .font(.dsHeadline)
                 .foregroundStyle(DSColor.textPrimary.value)
         }

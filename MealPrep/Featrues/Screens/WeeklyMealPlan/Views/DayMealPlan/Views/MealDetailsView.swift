@@ -8,18 +8,28 @@
 import SwiftUI
 
 struct MealDetailsView: View {
+    let meal: PlannedMeal
+
+    private var costPerServing: Double {
+        let servings = max(meal.servings, 1)
+        return NSDecimalNumber(decimal: meal.estimatedCost).doubleValue / Double(servings)
+    }
+
     var body: some View {
-        VStack {
-            Text("BBQ Chicken Loaded Jackets")
+        VStack(spacing: DSSpace.xs.value) {
+            Text(meal.name)
                 .modifier(DayMealPlanSectionTitleViewModifier(font: .dsBody))
 
             HStack(spacing: DSSpace.xs.value) {
 
-                DSLabelWithIconView(icon: .clock, label: "25 min")
+                DSLabelWithIconView(icon: .clock, label: "\(meal.prepTimeMinutes) min")
 
-                DSLabelWithIconView(icon: .user, label: "2 servings")
+                DSLabelWithIconView(
+                    icon: .user,
+                    label: "\(meal.servings) serving\(meal.servings == 1 ? "" : "s")"
+                )
 
-                DSLabelWithIconView(icon: .cash, label: "€ 4.18 / serving")
+                DSLabelWithIconView(icon: .cash, label: "€ \(costPerServing.toFormatedString(with: 2)) / serving")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -27,5 +37,5 @@ struct MealDetailsView: View {
 }
 
 #Preview {
-    MealDetailsView()
+    MealDetailsView(meal: MealPlan.preview.days[0].meals[0])
 }

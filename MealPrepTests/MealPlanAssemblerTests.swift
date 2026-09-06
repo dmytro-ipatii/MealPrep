@@ -108,8 +108,8 @@ struct MealPlanAssemblerTests {
             by: \.productID
         ).mapValues { $0.reduce(Decimal(0)) { $0 + $1.costShare } }
 
-        for line in plan.basket.lines {
-            let attributed = try #require(sharesByProduct[line.product.id])
+        for line in plan.shoppingList {
+            let attributed = try #require(sharesByProduct[line.productID])
             let difference = abs(NSDecimalNumber(decimal: attributed - line.cost).doubleValue)
             #expect(difference < 0.01)
         }

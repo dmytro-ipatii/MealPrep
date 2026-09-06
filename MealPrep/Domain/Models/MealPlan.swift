@@ -14,10 +14,13 @@ struct MealPlan: Sendable, Equatable {
     let generatedAt: Date
     let configuration: MealPlanConfiguration
     let days: [PlanDay]
-    let basket: Basket
+    /// Snapshotted, so a stored plan still renders after the bundled catalog
+    /// changes. See `ShoppingLine`.
+    let shoppingList: [ShoppingLine]
 
-    var totalCost: Decimal { basket.totalCost }
-    var totalWasteQuantity: Double { basket.totalWasteQuantity }
+    var totalCost: Decimal { shoppingList.reduce(0) { $0 + $1.cost } }
+    var totalWasteQuantity: Double { shoppingList.reduce(0) { $0 + $1.wasteQuantity } }
+    var skuCount: Int { shoppingList.count }
 }
 
 struct PlanDay: Sendable, Equatable {

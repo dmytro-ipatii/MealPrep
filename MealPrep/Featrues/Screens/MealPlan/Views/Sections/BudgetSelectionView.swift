@@ -57,7 +57,7 @@ private struct BedgetSettingInputView: View {
     }
 
     private var valueView: some View {
-        Text("€\(String(format: "%.0f", value))")
+        Text("€\(value.toFormatedString())")
             .font(.dsDisplayXL)
             .frame(maxWidth: .infinity, alignment: .center)
             .foregroundStyle(
@@ -83,5 +83,10 @@ private struct BedgetSettingInputView: View {
 }
 
 #Preview {
-    BudgetSelectionView(viewModel: MealPlanScreenView.ViewModel(modelManager: ModalManager(), configurationStore: PreviewConfigurationStore()))
+    BudgetSelectionView(viewModel: MealPlanScreenView.ViewModel(
+        modelManager: ModalManager(),
+        configurationStore: PreviewConfigurationStore(),
+        generator: MealPlanGenerator(client: PreviewMealPlanLLMClient()),
+        mealPlanRepository: PreviewMealPlanRepository()
+    ))
 }

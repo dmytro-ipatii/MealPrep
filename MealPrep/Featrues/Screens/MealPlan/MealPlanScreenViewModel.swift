@@ -8,7 +8,7 @@
 import Foundation
 
 enum ProcessMealPlanState {
-    case processing
+    case processing(message: String)
     case complete
     case error(String)
 }
@@ -21,6 +21,9 @@ extension MealPlanScreenView {
 
         private let modelManager: ModalManager
         private let configurationStore: ConfigurationStoring
+        private let generator: MealPlanGenerator
+        private let mealPlanRepository: MealPlanRepositoryProtocol
+        private var generationTask: Task<Void, Never>?
 
         var section: MealPlanSection
         var sectionsHistory: [MealPlanSection]
@@ -40,12 +43,19 @@ extension MealPlanScreenView {
         var dietaryNeeds: [Diet] = []
         var nutritionalGoal: [Nutrition] = []
 
-        var processMealPlanState: ProcessMealPlanState = .processing
+        var processMealPlanState: ProcessMealPlanState = .processing(message: "")
         var isProcessingViewPresent: Bool = false
 
-        init(modelManager: ModalManager, configurationStore: ConfigurationStoring) {
+        init(
+            modelManager: ModalManager,
+            configurationStore: ConfigurationStoring,
+            generator: MealPlanGenerator,
+            mealPlanRepository: MealPlanRepositoryProtocol
+        ) {
             self.modelManager = modelManager
             self.configurationStore = configurationStore
+            self.generator = generator
+            self.mealPlanRepository = mealPlanRepository
 
             section = MealPlanSection.initial
             sectionsHistory = [MealPlanSection.initial]
@@ -86,22 +96,53 @@ extension MealPlanScreenView {
 
             self.nutritionalGoal = nutritionalGoal
 
-            persistConfiguration()
+            let configuration = persistConfiguration()
 
-            Task {
-                processMealPlanState = .processing
-                isProcessingViewPresent = true
+            processMealPlanState = .processing(message: GenerationProgress.loadingCatalog.message)
+            isProcessingViewPresent = true
 
-                try? await Task.sleep(for: .seconds(3))
-
-                processMealPlanState = .complete
+            generationTask = Task { [weak self] in
+                await self?.runGeneration(for: configuration)
             }
-            //onComplete()
+        }
+
+        private func runGeneration(for configuration: MealPlanConfiguration) async {
+            do {
+                for try await progress in generator.generate(configuration: configuration) {
+                    if case .finished(let plan) = progress {
+                        // Persist only on complete success — a cancelled or
+                        // failed run must leave no half-plan behind.
+                        try mealPlanRepository.save(plan)
+                        processMealPlanState = .complete
+                    } else {
+                        processMealPlanState = .processing(message: progress.message)
+                    }
+                }
+            } catch is CancellationError {
+                isProcessingViewPresent = false
+            } catch {
+                processMealPlanState = .error(Self.userFacingMessage(for: error))
+            }
+        }
+
+        private static func userFacingMessage(for error: Error) -> String {
+            switch error {
+            case GenerationError.budgetInfeasible(let message):
+                message
+            case GenerationError.couldNotSatisfyConstraints:
+                "We couldn't build a plan that fits all of your requirements. Try raising the budget or relaxing one of them."
+            case MealPlanLLMError.missingAPIKey:
+                "The app is missing its API key, so it can't generate a plan."
+            default:
+                "Something went wrong while building your plan. Please try again."
+            }
         }
 
         func closeProcessingView() {
+            generationTask?.cancel()
+            generationTask = nil
             isProcessingViewPresent = false
-            processMealPlanState = .processing
+            processMealPlanState = .processing(message: "")
         }
 
         func navigateBack(onComplete: @escaping () -> Void ) {
@@ -147,7 +188,8 @@ extension MealPlanScreenView {
             }
         }
 
-        private func persistConfiguration() {
+        @discardableResult
+        private func persistConfiguration() -> MealPlanConfiguration {
             let configuration = MealPlanConfiguration(
                 weeklyBudget: Decimal(budget),
                 currencyCode: "EUR",
@@ -158,6 +200,7 @@ extension MealPlanScreenView {
             )
 
             configurationStore.save(configuration)
+            return configuration
         }
 
     }

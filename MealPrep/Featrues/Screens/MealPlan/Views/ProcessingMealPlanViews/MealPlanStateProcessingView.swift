@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct MealPlanStateProcessingView: View {
+    /// Generation takes 20-60 seconds across several calls, so the current
+    /// stage is shown rather than a bare spinner, which reads as a hang.
+    var message: String = "Processing..."
+
     var body: some View {
         VStack {
             Image(.mealBag)
@@ -15,15 +19,16 @@ struct MealPlanStateProcessingView: View {
                 .aspectRatio(1, contentMode: .fit)
                 .frame(height: 200)
 
-            Text("Processing...")
+            Text(message)
                 .font(.dsBody)
                 .foregroundStyle(DSColor.textPrimary.value)
-
+                .multilineTextAlignment(.center)
+                .animation(.easeInOut, value: message)
         }
     }
 }
 
 #Preview {
-    MealPlanStateProcessingView()
+    MealPlanStateProcessingView(message: "Writing recipes… 3 of 7 days")
 }
 

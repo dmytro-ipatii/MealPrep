@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct WeeklyMealPlanFlowView: View {
+    let plan: MealPlan
+
     var body: some View {
-        WeeklyMealPlanScreenView()
+        WeeklyMealPlanScreenView(plan: plan)
     }
 }
 
 #Preview {
-    WeeklyMealPlanFlowView()
+    WeeklyMealPlanFlowView(plan: .preview)
 }

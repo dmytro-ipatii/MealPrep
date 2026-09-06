@@ -54,7 +54,9 @@ enum MealPlanAssembler {
             generatedAt: generatedAt,
             configuration: configuration,
             days: days,
-            basket: basket
+            shoppingList: basket.lines
+                .map(ShoppingLine.init)
+                .sorted { ($0.cost, $0.productName) > ($1.cost, $1.productName) }
         )
     }
 
@@ -106,8 +108,17 @@ enum MealPlanAssembler {
 
     /// A meal has no standalone price under whole-package costing, so it gets
     /// the share of the package its portion represents.
+    ///
+    /// Rounded: the raw division produces ~20 significant digits, which is
+    /// meaningless for money and does not survive a SwiftData round trip
+    /// intact. Four places keeps the per-meal sums accurate to well under a
+    /// cent across a week.
     private static func costShare(quantity: Double, line: BasketLine?) -> Decimal {
         guard let line, line.requiredQuantity > 0 else { return 0 }
-        return line.cost * Decimal(quantity / line.requiredQuantity)
+
+        var raw = line.cost * Decimal(quantity / line.requiredQuantity)
+        var rounded = Decimal()
+        NSDecimalRound(&rounded, &raw, 4, .plain)
+        return rounded
     }
 }

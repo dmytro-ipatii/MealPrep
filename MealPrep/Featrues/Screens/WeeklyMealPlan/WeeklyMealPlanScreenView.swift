@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct WeeklyMealPlanScreenView: View {
-    private var budget: Double
+    let plan: MealPlan
 
     @State private var selectedDay: WeekDay
 
-    init() {
-        self.budget = 80
+    init(plan: MealPlan) {
+        self.plan = plan
         self.selectedDay = WeekDay(date: .now) ?? .monday
     }
 
@@ -25,7 +25,7 @@ struct WeeklyMealPlanScreenView: View {
                 titleView
 
                 // Budget
-                BudgetBoxsView(budget: budget)
+                BudgetBoxsView(budget: NSDecimalNumber(decimal: plan.totalCost).doubleValue)
 
             }
             .padding(.horizontal,DSSpace.lg.value)
@@ -35,7 +35,7 @@ struct WeeklyMealPlanScreenView: View {
                 WeekDayPickerView(selection: $selectedDay)
 
                 // Weak meal plans
-                WeekMealPlanSliderView(weekDay: $selectedDay)
+                WeekMealPlanSliderView(weekDay: $selectedDay, plan: plan)
                     .ignoresSafeArea(.all)
 
             }
@@ -57,5 +57,5 @@ struct WeeklyMealPlanScreenView: View {
 }
 
 #Preview {
-    WeeklyMealPlanScreenView()
+    WeeklyMealPlanScreenView(plan: .preview)
 }

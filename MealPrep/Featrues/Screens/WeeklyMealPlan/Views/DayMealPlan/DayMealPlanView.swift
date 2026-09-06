@@ -9,31 +9,39 @@ import SwiftUI
 
 struct DayMealPlanView: View {
     var weekDay: WeekDay
+    var day: PlanDay?
+
+    @State private var selectedSlot: MealSlot = .breakfast
+
+    private var meal: PlannedMeal? {
+        day?.meals.first { $0.slot == selectedSlot } ?? day?.meals.first
+    }
 
     var body: some View {
-        VStack(spacing: DSSpace.xxl.value){
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: DSSpace.xl.value) {
 
-            Text(weekDay.name)
-                .modifier(DayMealPlanSectionTitleViewModifier(font: .dsHeadline))
+                Text(weekDay.name)
+                    .modifier(DayMealPlanSectionTitleViewModifier(font: .dsHeadline))
 
-            // Meal Details
-            MealDetailsView()
+                slotPicker
 
-            // Ingredients
-            VStack {
-                Text("Ingredients")
-                    .modifier(DayMealPlanSectionTitleViewModifier(font: .dsFootnote))
+                if let meal {
+                    MealDetailsView(meal: meal)
+
+                    ingredientsSection(for: meal)
+
+                    recipeSection(for: meal)
+                } else {
+                    Text("No meals for this day.")
+                        .font(.dsBody)
+                        .foregroundStyle(DSColor.textSecondary.value)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
-
-            // Recipe
-            VStack {
-                Text("Recipe")
-                    .modifier(DayMealPlanSectionTitleViewModifier(font: .dsFootnote))
-            }
-
+            .padding(DSSpace.xl.value)
         }
-        .padding(DSSpace.xl.value)
-        .frame(maxWidth:  .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
             UnevenRoundedRectangle(cornerRadii: .init(
                 topLeading: DSCornerRadius.xl.value,
@@ -42,14 +50,121 @@ struct DayMealPlanView: View {
             .fill(DSColor.backgroundPrimary.value)
         )
     }
+
+    private var slotPicker: some View {
+        HStack(spacing: DSSpace.xs.value) {
+            ForEach(MealSlot.allCases, id: \.self) { slot in
+                Button {
+                    selectedSlot = slot
+                } label: {
+                    Text(slot.displayName)
+                        .font(.dsFootnote)
+                        .foregroundStyle(
+                            slot == selectedSlot
+                                ? DSColor.textVibrantPrimary.value
+                                : DSColor.textSecondary.value
+                        )
+                        .padding(.vertical, DSSpace.xs.value)
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: DSCornerRadius.full.value)
+                                .fill(slot == selectedSlot ? DSColor.accent.value : DSColor.backgroundSecondary.value)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func ingredientsSection(for meal: PlannedMeal) -> some View {
+        VStack(alignment: .leading, spacing: DSSpace.xs.value) {
+            Text("Ingredients")
+                .modifier(DayMealPlanSectionTitleViewModifier(font: .dsFootnote))
+
+            ForEach(meal.ingredients, id: \.productID) { ingredient in
+                HStack(alignment: .top) {
+                    Text(ingredient.productName)
+                        .font(.dsBody)
+                        .foregroundStyle(DSColor.textPrimary.value)
+
+                    Spacer(minLength: DSSpace.sm.value)
+
+                    Text("\(ingredient.quantity.toFormatedString()) \(ingredient.unit)")
+                        .font(.dsBody)
+                        .foregroundStyle(DSColor.textSecondary.value)
+                }
+            }
+
+            if !meal.pantryItems.isEmpty {
+                // Staples are already owned, so they are shown apart from the
+                // things the user actually has to buy.
+                Text("From your pantry")
+                    .font(.dsFootnote)
+                    .foregroundStyle(DSColor.textSecondary.value)
+                    .padding(.top, DSSpace.xs.value)
+
+                Text(meal.pantryItems.map(\.displayName).joined(separator: ", "))
+                    .font(.dsBody)
+                    .foregroundStyle(DSColor.textSecondary.value)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func recipeSection(for meal: PlannedMeal) -> some View {
+        VStack(alignment: .leading, spacing: DSSpace.xs.value) {
+            Text("Recipe")
+                .modifier(DayMealPlanSectionTitleViewModifier(font: .dsFootnote))
+
+            ForEach(Array(meal.recipe.steps.enumerated()), id: \.offset) { index, step in
+                HStack(alignment: .top, spacing: DSSpace.xs.value) {
+                    Text("\(index + 1).")
+                        .font(.dsBody)
+                        .foregroundStyle(DSColor.textSecondary.value)
+
+                    Text(step)
+                        .font(.dsBody)
+                        .foregroundStyle(DSColor.textPrimary.value)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+extension MealSlot {
+    var displayName: String {
+        switch self {
+        case .breakfast: "Breakfast"
+        case .lunch: "Lunch"
+        case .dinner: "Dinner"
+        }
+    }
+}
+
+extension PantryStaple {
+    var displayName: String {
+        switch self {
+        case .salt: "Salt"
+        case .blackPepper: "Black pepper"
+        case .oliveOil: "Olive oil"
+        case .vegetableOil: "Vegetable oil"
+        case .vinegar: "Vinegar"
+        case .water: "Water"
+        case .garlicPowder: "Garlic powder"
+        case .driedHerbs: "Dried herbs"
+        case .groundSpices: "Ground spices"
+        case .bakingSoda: "Baking soda"
+        }
+    }
 }
 
 #Preview {
     VStack {
-        DayMealPlanView(weekDay: .monday)
+        DayMealPlanView(weekDay: .monday, day: MealPlan.preview.days.first)
     }
     .padding()
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(DSColor.accent.value.ignoresSafeArea())
-
 }

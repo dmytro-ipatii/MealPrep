@@ -26,7 +26,12 @@ struct MealPlanProgressView: View {
 }
 
 #Preview {
-    MealPlanProgressView(viewModel: MealPlanScreenView.ViewModel(modelManager: ModalManager(), configurationStore: PreviewConfigurationStore()))
+    MealPlanProgressView(viewModel: MealPlanScreenView.ViewModel(
+        modelManager: ModalManager(),
+        configurationStore: PreviewConfigurationStore(),
+        generator: MealPlanGenerator(client: PreviewMealPlanLLMClient()),
+        mealPlanRepository: PreviewMealPlanRepository()
+    ))
         .padding()
 }
 

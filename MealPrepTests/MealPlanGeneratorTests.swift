@@ -281,7 +281,7 @@ struct MealPlanGeneratorTests {
 
         #expect(plan.totalCost <= configuration.weeklyBudget)
         #expect(plan.totalCost > 0)
-        #expect(plan.basket.skuCount == cheapProducts.count)
+        #expect(plan.skuCount == cheapProducts.count)
     }
 
     private func lookup(_ products: [Product]) -> [String: Product] {

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct WeekMealPlanSliderView: View {
     @Binding var weekDay: WeekDay
+    let plan: MealPlan
 
     @State private var scrollPosition: WeekDay?
 
@@ -19,7 +20,7 @@ struct WeekMealPlanSliderView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: itemSpacing) {
                 ForEach(WeekDay.allCases) { day in
-                    DayMealPlanView(weekDay: day)
+                    DayMealPlanView(weekDay: day, day: plan.days.first { $0.dayIndex == day.dayIndex })
                         .containerRelativeFrame(.horizontal, count: 1, spacing: itemSpacing)
                         .id(day)
                 }
@@ -49,7 +50,7 @@ struct WeekMealPlanSliderView: View {
 
 #Preview {
     VStack {
-        WeekMealPlanSliderView(weekDay: .constant(.monday))
+        WeekMealPlanSliderView(weekDay: .constant(.monday), plan: .preview)
     }
     .padding(.vertical)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
