@@ -84,9 +84,29 @@ struct CandidateSelectorTests {
 
         #expect(selected.count == CandidateSelector.defaultTargetCount)
 
+        // Every department that still has something worth buying must be
+        // represented — a shortlist skewed to one department cannot compose
+        // balanced meals.
+        let buyable = result.products.filter {
+            !PantryStaple.duplicatesAStaple(categoryID: $0.categoryID)
+        }
         let representedDepartments = Set(selected.map(\.departmentID))
-        let availableDepartments = Set(result.products.map(\.departmentID))
+        let availableDepartments = Set(buyable.map(\.departmentID))
         #expect(representedDepartments == availableDepartments)
+    }
+
+    @Test func theCondimentsDepartmentDropsOutEntirelyBecauseItIsAllPantryStaples() throws {
+        // Every product in `condimenti` is an oil, vinegar, salt, or spice —
+        // things the user already owns. Buying any of them is pure waste, so
+        // the whole department is absent from the pool by design.
+        let result = try ProductCatalogLoader.load()
+        let scores = GoalRankingService.score(result.products, for: [])
+
+        let hasCondiments = result.products.contains { $0.departmentID == "condimenti" }
+        let selected = CandidateSelector.select(from: result.products, scores: scores)
+
+        #expect(hasCondiments)
+        #expect(!selected.contains { $0.departmentID == "condimenti" })
     }
 }
 

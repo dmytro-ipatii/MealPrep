@@ -22,6 +22,10 @@ enum CandidateSelector {
         scores: [String: Double],
         targetCount: Int = defaultTargetCount
     ) -> [Product] {
+        // Products that duplicate a free pantry staple never enter the pool —
+        // paying for olive oil the user already owns is exactly the waste the
+        // staple list exists to prevent (app plan section 8).
+        let products = products.filter { !PantryStaple.duplicatesAStaple(categoryID: $0.categoryID) }
         guard !products.isEmpty else { return [] }
 
         let productsByDepartment = Dictionary(grouping: products, by: \.departmentID)

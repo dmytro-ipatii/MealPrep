@@ -28,6 +28,17 @@ struct PlanSkeletonRequest: Sendable {
     }
 }
 
+/// A repair round: the plan that failed, plus exactly what is wrong with it.
+/// The model is asked for a *minimal edit*, never a regeneration — a fresh
+/// plan would discard the parts that already validated.
+struct PlanRepairRequest: Sendable {
+    let skeleton: PlanSkeleton
+    let violations: [PlanViolation]
+    let configuration: MealPlanConfiguration
+    let candidates: [Product]
+    let skuLimit: Int
+}
+
 enum MealPlanLLMError: Error, Sendable, Equatable {
     /// A structured-output refusal: the model declined to answer. Arrives
     /// with nil content and must not surface as a decode failure.
@@ -41,4 +52,5 @@ enum MealPlanLLMError: Error, Sendable, Equatable {
 /// outside of the wire-format schema types themselves.
 protocol MealPlanLLMClient: Sendable {
     func generatePlanSkeleton(_ request: PlanSkeletonRequest) async throws -> PlanSkeleton
+    func repairPlanSkeleton(_ request: PlanRepairRequest) async throws -> PlanSkeleton
 }

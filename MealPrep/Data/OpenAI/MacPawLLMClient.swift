@@ -22,10 +22,18 @@ struct MacPawLLMClient: MealPlanLLMClient {
     }
 
     func generatePlanSkeleton(_ request: PlanSkeletonRequest) async throws -> PlanSkeleton {
+        try await requestSkeleton(userPrompt: PlanSkeletonPromptBuilder.userPrompt(for: request))
+    }
+
+    func repairPlanSkeleton(_ request: PlanRepairRequest) async throws -> PlanSkeleton {
+        try await requestSkeleton(userPrompt: PlanSkeletonPromptBuilder.repairPrompt(for: request))
+    }
+
+    private func requestSkeleton(userPrompt: String) async throws -> PlanSkeleton {
         let query = ChatQuery(
             messages: [
                 .system(.init(content: .textContent(PlanSkeletonPromptBuilder.systemPrompt()))),
-                .user(.init(content: .string(PlanSkeletonPromptBuilder.userPrompt(for: request)))),
+                .user(.init(content: .string(userPrompt))),
             ],
             model: model,
             responseFormat: .jsonSchema(

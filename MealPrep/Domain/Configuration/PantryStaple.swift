@@ -23,4 +23,21 @@ enum PantryStaple: String, Codable, CaseIterable, Sendable {
     case driedHerbs
     case groundSpices
     case bakingSoda
+
+    /// Catalog categories whose products duplicate a free staple. They are
+    /// filtered out of the candidate pool entirely, so the model can never
+    /// spend €4 on olive oil the user already owns — and `PlanValidator`
+    /// rejects them again as a backstop.
+    static let duplicateCategoryPrefixes: [String] = [
+        "en:salts",
+        "en:olive-oils",
+        "en:vegetable-oils",
+        "en:spices",
+        "en:condiments",
+        "en:vinegars",
+    ]
+
+    static func duplicatesAStaple(categoryID: String) -> Bool {
+        duplicateCategoryPrefixes.contains(where: categoryID.hasPrefix)
+    }
 }

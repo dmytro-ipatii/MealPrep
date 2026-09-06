@@ -33,6 +33,49 @@ enum PlanSkeletonPromptBuilder {
         return sections.joined(separator: "\n\n")
     }
 
+    /// Asks for a minimal edit to a plan that failed validation. Regenerating
+    /// from scratch would throw away the days that already validated and is
+    /// far more likely to introduce brand new violations.
+    static func repairPrompt(for request: PlanRepairRequest) -> String {
+        let violations = request.violations
+            .map { "- \($0.description)" }
+            .joined(separator: "\n")
+
+        let previousPlan = encodedSkeleton(request.skeleton)
+
+        return """
+        The plan below failed validation. Fix ONLY the listed problems by making \
+        the smallest possible edit. Keep every meal that is not implicated — do \
+        not regenerate the plan, do not renumber days, and do not rename meals \
+        you are not changing.
+
+        Problems to fix:
+        \(violations)
+
+        How to fix cost problems, in order of preference:
+        1. Replace a product used in only one meal with a product already used \
+        elsewhere in the plan from the same category — that removes a whole package.
+        2. Swap a product for a cheaper one in the same category.
+        3. Reduce quantities, but only where that drops a whole package.
+        4. Only as a last resort, remove an ingredient from a meal that still \
+        has at least 2 priced ingredients left.
+
+        Current plan:
+        \(previousPlan)
+
+        \(constraintsDescription(for: request))
+
+        \(candidateProductsListing(request.candidates))
+        """
+    }
+
+    private static func encodedSkeleton(_ skeleton: PlanSkeleton) -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        guard let data = try? encoder.encode(skeleton) else { return "{}" }
+        return String(decoding: data, as: UTF8.self)
+    }
+
     // MARK: - Sections
 
     private static func taskDescription(for request: PlanSkeletonRequest) -> String {
@@ -51,11 +94,29 @@ enum PlanSkeletonPromptBuilder {
     }
 
     private static func constraintsDescription(for request: PlanSkeletonRequest) -> String {
-        let configuration = request.configuration
-        let skuBudget = skuBudget(for: request.dayCount)
-        let targetSpend = (configuration.weeklyBudget * Decimal(request.dayCount) / 7 * Decimal(0.85))
+        constraintsDescription(
+            configuration: request.configuration,
+            dayCount: request.dayCount,
+            skuBudget: skuBudget(for: request.dayCount)
+        )
+    }
+
+    private static func constraintsDescription(for request: PlanRepairRequest) -> String {
+        constraintsDescription(
+            configuration: request.configuration,
+            dayCount: request.skeleton.days.count,
+            skuBudget: request.skuLimit
+        )
+    }
+
+    private static func constraintsDescription(
+        configuration: MealPlanConfiguration,
+        dayCount: Int,
+        skuBudget: Int
+    ) -> String {
+        let targetSpend = (configuration.weeklyBudget * Decimal(dayCount) / 7 * Decimal(0.85))
         let budgetLine = "The full week's budget is \(configuration.weeklyBudget) \(configuration.currencyCode); "
-            + "aim to use about \(targetSpend) \(configuration.currencyCode) for this \(request.dayCount == 1 ? "day" : "\(request.dayCount)-day span") "
+            + "aim to use about \(targetSpend) \(configuration.currencyCode) for this \(dayCount == 1 ? "day" : "\(dayCount)-day span") "
             + "(roughly 85% — leave headroom for repair)."
 
         var lines = [
@@ -103,7 +164,10 @@ enum PlanSkeletonPromptBuilder {
         }
     }
 
-    private static func skuBudget(for dayCount: Int) -> Int {
+    /// The distinct-product ceiling. Shared with `PlanValidator` so the plan
+    /// is judged against the same number the prompt asked for — models handle
+    /// a discrete count far more reliably than a running currency total.
+    static func skuBudget(for dayCount: Int) -> Int {
         max(6, Int((Double(dayCount) / 7.0 * 28).rounded()))
     }
 }
