@@ -26,7 +26,7 @@ struct MealPlanProgressView: View {
 }
 
 #Preview {
-    MealPlanProgressView(viewModel: MealPlanScreenView.ViewModel())
+    MealPlanProgressView(viewModel: MealPlanScreenView.ViewModel(modelManager: ModalManager()))
         .padding()
 }
 

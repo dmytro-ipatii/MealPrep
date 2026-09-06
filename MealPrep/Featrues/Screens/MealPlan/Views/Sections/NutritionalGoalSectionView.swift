@@ -33,5 +33,5 @@ struct NutritionalGoalSectionView: View {
 }
 
 #Preview {
-    NutritionalGoalSectionView(viewModel: MealPlanScreenView.ViewModel(), onComplete: ({}))
+    NutritionalGoalSectionView(viewModel: MealPlanScreenView.ViewModel(modelManager: ModalManager()), onComplete: ({}))
 }

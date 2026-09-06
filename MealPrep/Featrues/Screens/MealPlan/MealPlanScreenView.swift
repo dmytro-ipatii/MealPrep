@@ -13,8 +13,8 @@ struct MealPlanScreenView: View {
 
     let onComplete: () -> Void
 
-    init(onComplete: @escaping () -> Void) {
-        self.viewModel = ViewModel()
+    init(modelManager: ModalManager, onComplete: @escaping () -> Void) {
+        self.viewModel = ViewModel(modelManager: modelManager)
         self.onComplete = onComplete
     }
 
@@ -42,5 +42,5 @@ struct MealPlanScreenView: View {
 
 
 #Preview {
-    MealPlanScreenView(onComplete: ({}))
+    MealPlanScreenView(modelManager: ModalManager(), onComplete: ({}))
 }

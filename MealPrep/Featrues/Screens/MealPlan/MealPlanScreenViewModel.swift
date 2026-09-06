@@ -13,6 +13,8 @@ extension MealPlanScreenView {
     @Observable
     final class ViewModel {
 
+        private let modelManager: ModalManager
+
         var section: MealPlanSection
         var sectionsHistory: [MealPlanSection]
 
@@ -31,7 +33,9 @@ extension MealPlanScreenView {
         var dietaryNeeds: [Diet] = []
         var nutritionalGoal: [Nutrition] = []
 
-        init() {
+        init(modelManager: ModalManager) {
+            self.modelManager = modelManager
+
             section = MealPlanSection.initial
             sectionsHistory = [MealPlanSection.initial]
             completedSections = []
@@ -70,10 +74,35 @@ extension MealPlanScreenView {
 
         func navigateBack(onComplete: @escaping () -> Void ) {
 
+            guard !sectionsHistory.isEmpty else {
+                return
+            }
+
             sectionsHistory.removeLast()
 
             guard let prevSection = sectionsHistory.last else {
-                onComplete()
+
+                if !completedSections.isEmpty {
+                    modelManager.present(
+                        content: .init(
+                            title: "Discard changes?",
+                            message: "If you leave now, your changes will be lost.",
+                            buttons: [
+                                .init(label: "Keep editing", variant: .primary, action: ({
+                                    self.modelManager.dismiss()
+                                })),
+                                .init(label: "Discard changes", variant: .secondary, action: ({
+                                    self.modelManager.dismiss()
+                                    onComplete()
+                                }))
+                            ]
+                        )
+                    )
+                } else {
+                    onComplete()
+                }
+
+
                 return
             }
 

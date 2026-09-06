@@ -83,5 +83,5 @@ private struct BedgetSettingInputView: View {
 }
 
 #Preview {
-    BudgetSelectionView(viewModel: MealPlanScreenView.ViewModel())
+    BudgetSelectionView(viewModel: MealPlanScreenView.ViewModel(modelManager: ModalManager()))
 }

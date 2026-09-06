@@ -13,6 +13,7 @@ enum Path: Hashable {
 
 struct OnboardingFlowView: View {
 
+    @Environment(ModalManager.self) private var modelManager
     @State private var paths: [Path] = []
 
     let onComplete: () -> Void
@@ -25,15 +26,19 @@ struct OnboardingFlowView: View {
             .navigationDestination(for: Path.self) { path  in
                 switch path {
                 case .mealPlan:
-                    MealPlanScreenView(onComplete: onComplete)
+                    MealPlanScreenView(modelManager: modelManager, onComplete: onComplete)
                         .navigationBarBackButtonHidden(true)
                 }
             }
         }
+        .showDSAlert(with: modelManager)
 
     }
 }
 
 #Preview {
-    OnboardingFlowView(onComplete: ({}))
+    OnboardingFlowView(
+        onComplete: ({})
+    )
+    .environment(ModalManager())
 }
