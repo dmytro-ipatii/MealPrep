@@ -39,6 +39,14 @@ struct PlanRepairRequest: Sendable {
     let skuLimit: Int
 }
 
+/// One day of an already-validated skeleton, plus the products it references,
+/// so the prompt can name them. Pass B writes prose for exactly this day.
+struct RecipeRequest: Sendable {
+    let day: PlanSkeleton.Day
+    let products: [Product]
+    let configuration: MealPlanConfiguration
+}
+
 enum MealPlanLLMError: Error, Sendable, Equatable {
     /// A structured-output refusal: the model declined to answer. Arrives
     /// with nil content and must not surface as a decode failure.
@@ -53,4 +61,5 @@ enum MealPlanLLMError: Error, Sendable, Equatable {
 protocol MealPlanLLMClient: Sendable {
     func generatePlanSkeleton(_ request: PlanSkeletonRequest) async throws -> PlanSkeleton
     func repairPlanSkeleton(_ request: PlanRepairRequest) async throws -> PlanSkeleton
+    func generateRecipes(_ request: RecipeRequest) async throws -> DayRecipes
 }

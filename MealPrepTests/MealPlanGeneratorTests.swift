@@ -187,6 +187,103 @@ struct MealPlanGeneratorTests {
         }
     }
 
+    // MARK: - Pass B
+
+    @Test func generatesRecipesForEveryDayOfTheWeek() async throws {
+        let valid = PlanSkeleton.week(productIDs: cheapProducts.map(\.id))
+        let client = StubMealPlanLLMClient(generate: valid)
+        let generator = MealPlanGenerator(client: client)
+
+        let plan = try await generator.generatePlan(
+            configuration: .fixture(),
+            candidates: cheapProducts
+        )
+
+        #expect(client.recipeCallCount == MealPlanGenerator.daysPerPlan)
+        #expect(plan.days.count == MealPlanGenerator.daysPerPlan)
+
+        let everyMealHasARecipe = plan.days.flatMap(\.meals).allSatisfy { !$0.recipe.isEmpty }
+        #expect(everyMealHasARecipe)
+    }
+
+    @Test func theSevenRecipeCallsRunConcurrentlyNotOneAfterAnother() async throws {
+        let valid = PlanSkeleton.week(productIDs: cheapProducts.map(\.id))
+        let client = StubMealPlanLLMClient(generate: valid)
+        let generator = MealPlanGenerator(client: client)
+
+        _ = try await generator.generatePlan(configuration: .fixture(), candidates: cheapProducts)
+
+        // Sequential execution would never show more than one in flight.
+        #expect(client.peakConcurrentRecipeCalls > 1)
+    }
+
+    @Test func eachRecipeRequestOnlyCarriesThatDaysProducts() async throws {
+        let valid = PlanSkeleton.week(productIDs: cheapProducts.map(\.id))
+        let client = StubMealPlanLLMClient(generate: valid)
+        let generator = MealPlanGenerator(client: client)
+
+        _ = try await generator.generatePlan(configuration: .fixture(), candidates: cheapProducts)
+
+        for request in client.recipeRequests {
+            let dayProductIDs = Set(request.day.meals.flatMap { $0.ingredients.map(\.productID) })
+            #expect(Set(request.products.map(\.id)) == dayProductIDs)
+        }
+    }
+
+    @Test func requestsCoverEveryDayIndexExactlyOnce() async throws {
+        let valid = PlanSkeleton.week(productIDs: cheapProducts.map(\.id))
+        let client = StubMealPlanLLMClient(generate: valid)
+        let generator = MealPlanGenerator(client: client)
+
+        _ = try await generator.generatePlan(configuration: .fixture(), candidates: cheapProducts)
+
+        let requestedDays = client.recipeRequests.map(\.day.dayIndex).sorted()
+        #expect(requestedDays == Array(0..<MealPlanGenerator.daysPerPlan))
+    }
+
+    @Test func aFailureInOneRecipeCallFailsTheWholeGeneration() async {
+        struct RecipeBoom: Error {}
+        let valid = PlanSkeleton.week(productIDs: cheapProducts.map(\.id))
+        let client = StubMealPlanLLMClient(generate: valid)
+        client.recipeProvider = { request in
+            // Persisting a half-written plan is worse than failing outright.
+            if request.day.dayIndex == 4 { throw RecipeBoom() }
+            return .covering(request.day)
+        }
+        let generator = MealPlanGenerator(client: client)
+
+        await #expect(throws: RecipeBoom.self) {
+            try await generator.generatePlan(configuration: .fixture(), candidates: cheapProducts)
+        }
+    }
+
+    @Test func passBNeverRunsWhenPassAFailsValidation() async {
+        let broken = PlanSkeleton.week(productIDs: ["ghost", "p1"])
+        let client = StubMealPlanLLMClient(generate: broken, repairs: [broken])
+        let generator = MealPlanGenerator(client: client)
+
+        _ = try? await generator.generatePlan(configuration: .fixture(), candidates: cheapProducts)
+
+        // No point writing prose for a plan that will never ship.
+        #expect(client.recipeCallCount == 0)
+    }
+
+    @Test func theFinishedPlanIsPricedWithinBudget() async throws {
+        let valid = PlanSkeleton.week(productIDs: cheapProducts.map(\.id))
+        let client = StubMealPlanLLMClient(generate: valid)
+        let generator = MealPlanGenerator(client: client)
+        let configuration = MealPlanConfiguration.fixture(weeklyBudget: 70)
+
+        let plan = try await generator.generatePlan(
+            configuration: configuration,
+            candidates: cheapProducts
+        )
+
+        #expect(plan.totalCost <= configuration.weeklyBudget)
+        #expect(plan.totalCost > 0)
+        #expect(plan.basket.skuCount == cheapProducts.count)
+    }
+
     private func lookup(_ products: [Product]) -> [String: Product] {
         Dictionary(products.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }

@@ -165,26 +165,74 @@ final class StubMealPlanLLMClient: MealPlanLLMClient, @unchecked Sendable {
     var generateResult: Result<PlanSkeleton, Error>
     /// Consumed in order; the last one repeats once exhausted.
     var repairResults: [PlanSkeleton]
+    /// Builds the recipe response for a day. Defaults to full coverage.
+    var recipeProvider: @Sendable (RecipeRequest) throws -> DayRecipes
 
-    private(set) var generateCallCount = 0
-    private(set) var repairCallCount = 0
-    private(set) var repairRequests: [PlanRepairRequest] = []
+    private let queue = DispatchQueue(label: "StubMealPlanLLMClient")
+    private var _generateCallCount = 0
+    private var _repairCallCount = 0
+    private var _repairRequests: [PlanRepairRequest] = []
+    private var _recipeRequests: [RecipeRequest] = []
+    private var _peakConcurrentRecipeCalls = 0
+    private var _inFlightRecipeCalls = 0
+
+    var generateCallCount: Int { queue.sync { _generateCallCount } }
+    var repairCallCount: Int { queue.sync { _repairCallCount } }
+    var repairRequests: [PlanRepairRequest] { queue.sync { _repairRequests } }
+    var recipeRequests: [RecipeRequest] { queue.sync { _recipeRequests } }
+    var recipeCallCount: Int { queue.sync { _recipeRequests.count } }
+    var peakConcurrentRecipeCalls: Int { queue.sync { _peakConcurrentRecipeCalls } }
 
     init(generate: PlanSkeleton, repairs: [PlanSkeleton] = []) {
         self.generateResult = .success(generate)
         self.repairResults = repairs
+        self.recipeProvider = { request in .covering(request.day) }
     }
 
     func generatePlanSkeleton(_ request: PlanSkeletonRequest) async throws -> PlanSkeleton {
-        generateCallCount += 1
+        queue.sync { _generateCallCount += 1 }
         return try generateResult.get()
     }
 
     func repairPlanSkeleton(_ request: PlanRepairRequest) async throws -> PlanSkeleton {
-        repairRequests.append(request)
-        defer { repairCallCount += 1 }
+        let index: Int = queue.sync {
+            _repairRequests.append(request)
+            defer { _repairCallCount += 1 }
+            return _repairCallCount
+        }
 
         guard !repairResults.isEmpty else { return request.skeleton }
-        return repairResults[min(repairCallCount, repairResults.count - 1)]
+        return repairResults[min(index, repairResults.count - 1)]
+    }
+
+    func generateRecipes(_ request: RecipeRequest) async throws -> DayRecipes {
+        queue.sync {
+            _recipeRequests.append(request)
+            _inFlightRecipeCalls += 1
+            _peakConcurrentRecipeCalls = max(_peakConcurrentRecipeCalls, _inFlightRecipeCalls)
+        }
+        defer { queue.sync { _inFlightRecipeCalls -= 1 } }
+
+        // Yield so genuinely concurrent callers overlap and the peak counter
+        // measures something real.
+        await Task.yield()
+
+        return try recipeProvider(request)
+    }
+}
+
+extension DayRecipes {
+    /// A recipe for every meal in the given day, so assembly succeeds.
+    static func covering(_ day: PlanSkeleton.Day) -> DayRecipes {
+        DayRecipes(
+            meals: day.meals.map { meal in
+                MealRecipe(
+                    slot: meal.slot,
+                    mealName: meal.name,
+                    ingredientLines: meal.ingredients.map { "\($0.grams.formatted()) of \($0.productID)" },
+                    steps: ["Prepare the ingredients.", "Cook and serve."]
+                )
+            }
+        )
     }
 }

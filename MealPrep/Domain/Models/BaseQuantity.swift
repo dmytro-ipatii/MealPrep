@@ -12,4 +12,13 @@ enum BaseQuantity: Sendable, Hashable {
     case mass(grams: Double)
     case volume(milliliters: Double)
     case count(Int)
+
+    /// The unit a quantity of this product is expressed in.
+    var unitLabel: String {
+        switch self {
+        case .mass: "g"
+        case .volume: "ml"
+        case .count: "ct"
+        }
+    }
 }

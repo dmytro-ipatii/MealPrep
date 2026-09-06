@@ -26,6 +26,72 @@ actor MealPlanGenerator {
         self.client = client
     }
 
+    /// The whole of Pass A and Pass B: a validated skeleton, then recipe prose
+    /// for all seven days concurrently.
+    func generatePlan(
+        configuration: MealPlanConfiguration,
+        candidates: [Product],
+        generatedAt: Date = Date()
+    ) async throws -> MealPlan {
+        let skeleton = try await generateSkeleton(
+            configuration: configuration,
+            candidates: candidates
+        )
+
+        let recipesByDay = try await generateRecipes(
+            for: skeleton,
+            configuration: configuration,
+            candidates: candidates
+        )
+
+        return try MealPlanAssembler.assemble(
+            skeleton: skeleton,
+            recipesByDay: recipesByDay,
+            candidates: candidates,
+            configuration: configuration,
+            generatedAt: generatedAt
+        )
+    }
+
+    /// Seven independent calls, one per day, run concurrently — sequentially
+    /// this is the slowest part of generation by a wide margin. Cancelling the
+    /// enclosing task cancels the in-flight requests.
+    private func generateRecipes(
+        for skeleton: PlanSkeleton,
+        configuration: MealPlanConfiguration,
+        candidates: [Product]
+    ) async throws -> [Int: DayRecipes] {
+        let productsByID = Dictionary(
+            candidates.map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        return try await withThrowingTaskGroup(of: (Int, DayRecipes).self) { group in
+            for day in skeleton.days {
+                let usedProducts = Set(day.meals.flatMap { $0.ingredients.map(\.productID) })
+                    .compactMap { productsByID[$0] }
+                    .sorted { $0.id < $1.id }
+
+                group.addTask { [client] in
+                    let recipes = try await client.generateRecipes(
+                        RecipeRequest(
+                            day: day,
+                            products: usedProducts,
+                            configuration: configuration
+                        )
+                    )
+                    return (day.dayIndex, recipes)
+                }
+            }
+
+            var results: [Int: DayRecipes] = [:]
+            for try await (dayIndex, recipes) in group {
+                results[dayIndex] = recipes
+            }
+            return results
+        }
+    }
+
     func generateSkeleton(
         configuration: MealPlanConfiguration,
         candidates: [Product]
