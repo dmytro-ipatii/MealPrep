@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./scripts/build.sh)",
+      "Bash(./scripts/test.sh)",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun simctl list:*)",
+      "Bash(swift build:*)",
+      "Bash(swift test:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(rg:*)",
+      "Bash(jq:*)"
+    ],
+    "deny": [
+      "Read(./Config/Secrets.xcconfig)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.mobileprovision)",
+      "Bash(git push:*)",
+      "Bash(rm -rf:*)"
+    ]
+  }
+}
