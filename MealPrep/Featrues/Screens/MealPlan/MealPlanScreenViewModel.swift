@@ -20,6 +20,7 @@ extension MealPlanScreenView {
     final class ViewModel {
 
         private let modelManager: ModalManager
+        private let configurationStore: ConfigurationStoring
 
         var section: MealPlanSection
         var sectionsHistory: [MealPlanSection]
@@ -42,8 +43,9 @@ extension MealPlanScreenView {
         var processMealPlanState: ProcessMealPlanState = .processing
         var isProcessingViewPresent: Bool = false
 
-        init(modelManager: ModalManager) {
+        init(modelManager: ModalManager, configurationStore: ConfigurationStoring) {
             self.modelManager = modelManager
+            self.configurationStore = configurationStore
 
             section = MealPlanSection.initial
             sectionsHistory = [MealPlanSection.initial]
@@ -52,8 +54,14 @@ extension MealPlanScreenView {
 
             let budgetRangeValue: ClosedRange<Double> = 25...150
             budgetRange = budgetRangeValue
-            budget = budgetRangeValue.lowerBound
 
+            if let savedConfiguration = configurationStore.loadConfiguration() {
+                budget = NSDecimalNumber(decimal: savedConfiguration.weeklyBudget).doubleValue
+                dietaryNeeds = savedConfiguration.dietaryNeeds.map(Diet.init(dietaryNeed:))
+                nutritionalGoal = savedConfiguration.goals.map(Nutrition.init(nutritionalGoal:))
+            } else {
+                budget = budgetRangeValue.lowerBound
+            }
         }
 
         func setBudget(_ amount: Double)  {
@@ -77,6 +85,8 @@ extension MealPlanScreenView {
             setCompletedSection()
 
             self.nutritionalGoal = nutritionalGoal
+
+            persistConfiguration()
 
             Task {
                 processMealPlanState = .processing
@@ -135,6 +145,19 @@ extension MealPlanScreenView {
             if !completedSections.contains(section) {
                 completedSections.append(section)
             }
+        }
+
+        private func persistConfiguration() {
+            let configuration = MealPlanConfiguration(
+                weeklyBudget: Decimal(budget),
+                currencyCode: "EUR",
+                dietaryNeeds: Set(dietaryNeeds.compactMap(\.dietaryNeed)),
+                goals: Set(nutritionalGoal.compactMap(\.nutritionalGoal)),
+                servings: 1,
+                createdAt: Date()
+            )
+
+            configurationStore.save(configuration)
         }
 
     }

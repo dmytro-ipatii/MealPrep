@@ -10,16 +10,21 @@ import SwiftUI
 struct ContentView: View {
     @State var isUserPassedOnboarding: Bool = false
 
+    let configurationStore: ConfigurationStoring
+
     var body: some View {
         if isUserPassedOnboarding {
             WeeklyMealPlanFlowView()
         } else {
-            OnboardingFlowView(onComplete: ({ isUserPassedOnboarding = true}))
+            OnboardingFlowView(
+                configurationStore: configurationStore,
+                onComplete: ({ isUserPassedOnboarding = true})
+            )
         }
 
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(configurationStore: PreviewConfigurationStore())
 }

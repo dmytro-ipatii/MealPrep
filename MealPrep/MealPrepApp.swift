@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct MealPrepApp: App {
@@ -14,7 +15,7 @@ struct MealPrepApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(configurationStore: delegate.dependencies.configurationStore)
                 .environment(delegate.dependencies.modalManager)
         }
     }
@@ -34,8 +35,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @MainActor
 struct Dependencies {
     let modalManager: ModalManager
+    let modelContainer: ModelContainer
+    let configurationStore: ConfigurationStoring
 
     init() {
         self.modalManager = ModalManager()
+
+        do {
+            self.modelContainer = try ModelContainer(for: StoredConfiguration.self)
+        } catch {
+            preconditionFailure("Failed to create SwiftData ModelContainer: \(error)")
+        }
+
+        self.configurationStore = SwiftDataConfigurationStore(
+            modelContext: ModelContext(modelContainer)
+        )
     }
 }

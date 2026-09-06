@@ -16,6 +16,7 @@ struct OnboardingFlowView: View {
     @Environment(ModalManager.self) private var modelManager
     @State private var paths: [Path] = []
 
+    let configurationStore: ConfigurationStoring
     let onComplete: () -> Void
 
     var body: some View {
@@ -26,7 +27,7 @@ struct OnboardingFlowView: View {
             .navigationDestination(for: Path.self) { path  in
                 switch path {
                 case .mealPlan:
-                    MealPlanScreenView(modelManager: modelManager, onComplete: onComplete)
+                    MealPlanScreenView(modelManager: modelManager, configurationStore: configurationStore, onComplete: onComplete)
                         .navigationBarBackButtonHidden(true)
                 }
             }
@@ -38,6 +39,7 @@ struct OnboardingFlowView: View {
 
 #Preview {
     OnboardingFlowView(
+        configurationStore: PreviewConfigurationStore(),
         onComplete: ({})
     )
     .environment(ModalManager())
