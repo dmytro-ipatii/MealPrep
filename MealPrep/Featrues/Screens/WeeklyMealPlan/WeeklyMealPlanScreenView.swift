@@ -12,6 +12,7 @@ struct WeeklyMealPlanScreenView: View {
     let onUpdatePlan: () -> Void
 
     @State private var selectedDay: WeekDay
+    @State private var isSettingsPresented: Bool = false
 
     init(plan: MealPlan, onUpdatePlan: @escaping () -> Void = {}) {
         self.plan = plan
@@ -29,9 +30,9 @@ struct WeeklyMealPlanScreenView: View {
                 // Budget
                 BudgetBoxsView(budget: NSDecimalNumber(decimal: plan.totalCost).doubleValue)
 
-                updatePlanButton
+                //updatePlanButton
             }
-            .padding(.horizontal,DSSpace.lg.value)
+            .padding(.horizontal, DSSpace.lg.value)
 
             VStack(spacing: 32) {
                 // Week day selection
@@ -43,16 +44,51 @@ struct WeeklyMealPlanScreenView: View {
 
             }
 
-
-
         }
         .padding(.top, DSSpace.lg.value)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(DSColor.accent.value)
+        .sheet(isPresented: $isSettingsPresented, content: {
+
+            VStack {
+                Text("Settings")
+                    .modifier(DayMealPlanSectionTitleViewModifier(font: .dsHeadline))
+
+                BudgetBoxsView(
+                    title: "Budget",
+                    budget: NSDecimalNumber(decimal: plan.totalCost).doubleValue
+                )
+
+                Spacer()
+
+                updatePlanButton
+            }
+            .padding(DSSpace.xl.value)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .background(DSColor.backgroundPrimary.value)
+            .presentationDetents([.height(300)])
+
+        })
+        .overlay(alignment: .topTrailing) {
+            VStack {
+                Image(systemName: "gearshape.fill")
+                    .font(.dsBody)
+                    .foregroundStyle(.backgroundSecondary)
+            }
+            .padding(DSSpace.xxs.value)
+            .offset(x: -20, y: 0)
+            .onTapGesture {
+                isSettingsPresented = true
+            }
+        }
     }
 
     private var updatePlanButton: some View {
-        DSButtonView(label: "Update meal plan", variant: .secondary, action: onUpdatePlan)
+        DSButtonView(label: "Update meal plan", variant: .primary, action: {
+            isSettingsPresented = false
+
+            onUpdatePlan()
+        })
             .padding(.top, DSSpace.xs.value)
     }
 
@@ -65,5 +101,10 @@ struct WeeklyMealPlanScreenView: View {
 }
 
 #Preview {
-    WeeklyMealPlanScreenView(plan: .preview, onUpdatePlan: {})
+
+
+    NavigationStack {
+        WeeklyMealPlanScreenView(plan: .preview, onUpdatePlan: {})
+    }
+
 }

@@ -57,19 +57,18 @@ struct DayMealPlanView: View {
                 Button {
                     selectedSlot = slot
                 } label: {
+
+                    let isSelected = slot == selectedSlot
+                    let background = isSelected ? DSColor.accent : DSColor.backgroundSecondary
+                    let foreground = isSelected ? DSColor.textVibrantPrimary.value : DSColor.textSecondary.value
+
                     Text(slot.displayName)
                         .font(.dsFootnote)
-                        .foregroundStyle(
-                            slot == selectedSlot
-                                ? DSColor.textVibrantPrimary.value
-                                : DSColor.textSecondary.value
-                        )
+                        .foregroundStyle(foreground)
                         .padding(.vertical, DSSpace.xs.value)
                         .frame(maxWidth: .infinity)
-                        .background(
-                            RoundedRectangle(cornerRadius: DSCornerRadius.full.value)
-                                .fill(slot == selectedSlot ? DSColor.accent.value : DSColor.backgroundSecondary.value)
-                        )
+                        .dsBackground(color: background, radius: .full)
+
                 }
                 .buttonStyle(.plain)
             }
@@ -84,29 +83,16 @@ struct DayMealPlanView: View {
             ForEach(meal.ingredients, id: \.productID) { ingredient in
                 HStack(alignment: .top) {
                     Text(ingredient.productName)
-                        .font(.dsBody)
                         .foregroundStyle(DSColor.textPrimary.value)
 
                     Spacer(minLength: DSSpace.sm.value)
 
                     Text("\(ingredient.quantity.toFormatedString()) \(ingredient.unit)")
-                        .font(.dsBody)
                         .foregroundStyle(DSColor.textSecondary.value)
                 }
+                .font(.dsCaption)
             }
 
-            if !meal.pantryItems.isEmpty {
-                // Staples are already owned, so they are shown apart from the
-                // things the user actually has to buy.
-                Text("From your pantry")
-                    .font(.dsFootnote)
-                    .foregroundStyle(DSColor.textSecondary.value)
-                    .padding(.top, DSSpace.xs.value)
-
-                Text(meal.pantryItems.map(\.displayName).joined(separator: ", "))
-                    .font(.dsBody)
-                    .foregroundStyle(DSColor.textSecondary.value)
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -119,14 +105,13 @@ struct DayMealPlanView: View {
             ForEach(Array(meal.recipe.steps.enumerated()), id: \.offset) { index, step in
                 HStack(alignment: .top, spacing: DSSpace.xs.value) {
                     Text("\(index + 1).")
-                        .font(.dsBody)
                         .foregroundStyle(DSColor.textSecondary.value)
 
                     Text(step)
-                        .font(.dsBody)
                         .foregroundStyle(DSColor.textPrimary.value)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                .font(.dsCaption)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

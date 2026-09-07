@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BudgetBoxsView: View {
-    let title: String = "Est. cost"
+    var title: String = "Est. cost"
     var budget: Double
     var perPeriod: String = "week"
 
