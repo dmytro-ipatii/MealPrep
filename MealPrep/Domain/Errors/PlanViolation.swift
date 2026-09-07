@@ -12,7 +12,7 @@ import Foundation
 /// The last three cases are an amendment to app plan section 11: section 14
 /// requires 7 days × 3 meals with at least 2 ingredients per meal, but the
 /// original enum had no way to report a structurally incomplete plan.
-enum PlanViolation: Sendable, Equatable {
+nonisolated enum PlanViolation: Sendable, Equatable {
     case unknownProduct(id: String, day: Int, slot: MealSlot)
     case dietaryViolation(productID: String, need: DietaryNeed)
     case pantryItemNotRecognized(String)

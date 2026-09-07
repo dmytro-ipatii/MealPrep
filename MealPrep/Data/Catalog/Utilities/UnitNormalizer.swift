@@ -9,7 +9,7 @@
 /// a unit it doesn't recognize — the caller must exclude that product rather
 /// than guess.
 enum UnitNormalizer {
-    static func baseQuantity(from netContent: NetContentDTO) -> BaseQuantity? {
+    nonisolated static func baseQuantity(from netContent: NetContentDTO) -> BaseQuantity? {
         switch netContent.unit.lowercased() {
         case "g":
             return .mass(grams: netContent.value)

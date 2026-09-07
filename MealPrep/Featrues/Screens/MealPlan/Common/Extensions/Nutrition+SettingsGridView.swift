@@ -5,7 +5,7 @@
 //  Created by Dmytro Ipatii on 05/09/2026.
 //
 
-extension Nutrition: SettingsGridProtocol {
+extension Nutrition: @MainActor SettingsGridProtocol {
 
     var id: Self {self}
 

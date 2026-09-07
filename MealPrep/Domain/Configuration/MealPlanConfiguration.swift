@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MealPlanConfiguration: Sendable, Equatable {
+nonisolated  struct MealPlanConfiguration: Sendable, Equatable {
     var weeklyBudget: Decimal
     var currencyCode: String
     var dietaryNeeds: Set<DietaryNeed>

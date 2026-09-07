@@ -13,6 +13,7 @@ import Foundation
 /// artifact. A finished plan must outlive the catalog it was built from — the
 /// bundled JSON can change with any app update — so what gets stored and
 /// rendered is this, with the name and numbers copied in.
+
 struct ShoppingLine: Sendable, Equatable {
     let productID: String
     let productName: String

@@ -2,33 +2,18 @@
 //  ProductCatalogLoader.swift
 //  MealPrep
 //
-//  Created by Dmytro Ipatii on 06/09/2026.
+//  Created by Dmytro Ipatii on 07/09/2026.
 //
 
 import Foundation
 
-enum ProductCatalogLoadError: Error {
-    case resourceNotFound
-    case decodingFailed(Error)
-}
-
-/// A catalog row that failed normalization, with the reason it was dropped.
-struct SkippedProduct: Sendable, Equatable {
-    let id: String
-    let name: String
-    let reason: String
-}
-
-struct ProductCatalogLoadResult: Sendable {
-    let products: [Product]
-    let skipped: [SkippedProduct]
-}
-
 /// Loads the bundled product catalog and normalizes every row into a
 /// `Product`. The catalog JSON shape must not leak past this loader.
-enum ProductCatalogLoader {
 
-    static func load(
+
+enum ProductCatalogLoader: Sendable {
+
+    nonisolated static func load(
         resourceName: String = "product_catalog_en",
         bundle: Bundle = .main
     ) throws -> ProductCatalogLoadResult {
@@ -48,7 +33,7 @@ enum ProductCatalogLoader {
         return normalize(dtos)
     }
 
-    static func normalize(_ dtos: [ProductDTO]) -> ProductCatalogLoadResult {
+    nonisolated static func normalize(_ dtos: [ProductDTO]) -> ProductCatalogLoadResult {
         var products: [Product] = []
         var skipped: [SkippedProduct] = []
 

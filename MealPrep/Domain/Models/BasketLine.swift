@@ -15,7 +15,7 @@ import Foundation
 /// illustrative `requiredGrams`/`purchasedGrams` — the catalog has both mass
 /// and volume products, so the quantity is in the product's own base unit
 /// (grams, millilitres, or item count), not always grams.
-struct BasketLine: Sendable, Equatable {
+nonisolated struct BasketLine: Sendable, Equatable {
     let product: Product
     let requiredQuantity: Double
     let packages: Int

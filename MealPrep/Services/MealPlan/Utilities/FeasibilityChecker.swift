@@ -7,11 +7,6 @@
 
 import Foundation
 
-enum FeasibilityResult: Sendable, Equatable {
-    case feasible
-    case infeasible(minimumCost: Decimal, message: String)
-}
-
 /// Precheck run on the candidate shortlist before any API call: is this
 /// budget achievable at all? Failing fast here beats three failed repair
 /// rounds ending in a degraded plan, and costs nothing.
@@ -92,3 +87,5 @@ private extension NutritionalGoal {
         }
     }
 }
+
+

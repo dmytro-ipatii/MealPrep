@@ -12,7 +12,7 @@
 /// requiring a check against the user's configuration is not a staple; it is a
 /// catalog product. Staples are free and excluded from the cost calculator and
 /// shopping list.
-enum PantryStaple: String, Codable, CaseIterable, Sendable {
+nonisolated enum PantryStaple: String, Codable, CaseIterable, Sendable {
     case salt
     case blackPepper
     case oliveOil

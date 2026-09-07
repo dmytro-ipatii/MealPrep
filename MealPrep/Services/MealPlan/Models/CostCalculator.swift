@@ -14,7 +14,7 @@ import Foundation
 /// then `packages = ceil(required / packageSize)`, `cost = packages × price`.
 /// Waste (`purchasedQuantity - requiredQuantity`) is a first-class output,
 /// not a side effect — it's free to compute and useful to the user.
-enum CostCalculator {
+nonisolated  enum CostCalculator {
 
     static func basket(for usages: [IngredientUsage]) -> Basket {
         let usagesByProduct = Dictionary(grouping: usages, by: \.product.id)
