@@ -15,7 +15,7 @@ import Foundation
 /// selection, so the model physically could not pick an unsafe product; this
 /// re-checks anyway, because "the model was only shown safe products" is an
 /// assumption and allergen exclusion is safety critical.
-enum PlanValidator {
+nonisolated enum PlanValidator {
 
     /// Plausible single-serving quantity bounds, in the product's base unit.
     /// A demo-grade heuristic — the catalog has no serving-size field.

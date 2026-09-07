@@ -10,7 +10,7 @@ import Foundation
 /// Joins a validated skeleton, its recipe prose, and the priced basket into a
 /// finished `MealPlan`. Every number here is computed in Swift; the model's
 /// contribution is names and steps.
-enum MealPlanAssembler {
+enum MealPlanAssembler: Sendable {
 
     static func assemble(
         skeleton: PlanSkeleton,

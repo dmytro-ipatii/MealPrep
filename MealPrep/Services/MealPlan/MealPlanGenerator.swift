@@ -67,15 +67,15 @@ actor MealPlanGenerator {
         onProgress(.loadingCatalog)
         let products = try loadCatalog()
 
-        let safeProducts = DietaryFilterService.filter(products, for: configuration.dietaryNeeds)
-        let scores = GoalRankingService.score(safeProducts, for: configuration.goals)
-        let candidates = CandidateSelector.select(from: safeProducts, scores: scores)
+        let safeProducts = await DietaryFilterService.filter(products, for: configuration.dietaryNeeds)
+        let scores = await GoalRankingService.score(safeProducts, for: configuration.goals)
+        let candidates = await CandidateSelector.select(from: safeProducts, scores: scores)
         onProgress(.filtering(candidateCount: candidates.count))
 
         try Task.checkCancellation()
 
         onProgress(.checkingFeasibility)
-        if case .infeasible(_, let message) = FeasibilityChecker.checkFeasibility(
+        if case .infeasible(_, let message) = await FeasibilityChecker.checkFeasibility(
             candidates: candidates,
             configuration: configuration
         ) {
@@ -112,7 +112,7 @@ actor MealPlanGenerator {
             onProgress: onProgress
         )
 
-        return try MealPlanAssembler.assemble(
+        return try await MealPlanAssembler.assemble(
             skeleton: skeleton,
             recipesByDay: recipesByDay,
             candidates: candidates,
@@ -126,7 +126,7 @@ actor MealPlanGenerator {
         candidates: [Product],
         onProgress: ProgressHandler? = nil
     ) async throws -> PlanSkeleton {
-        let skuLimit = PlanSkeletonPromptBuilder.skuBudget(for: Self.daysPerPlan)
+        let skuLimit = await PlanSkeletonPromptBuilder.skuBudget(for: Self.daysPerPlan)
 
         onProgress?(.planning)
         var skeleton = try await client.generatePlanSkeleton(
@@ -137,7 +137,7 @@ actor MealPlanGenerator {
             )
         )
 
-        skeleton = PlanRepairService.repair(
+        skeleton = await PlanRepairService.repair(
             skeleton,
             candidates: candidates,
             configuration: configuration,
@@ -163,7 +163,7 @@ actor MealPlanGenerator {
                 )
             )
 
-            skeleton = PlanRepairService.repair(
+            skeleton = await PlanRepairService.repair(
                 repaired,
                 candidates: candidates,
                 configuration: configuration,

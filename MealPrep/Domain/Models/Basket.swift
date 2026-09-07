@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Basket: Sendable, Equatable {
+nonisolated struct Basket: Sendable, Equatable {
     let lines: [BasketLine]
 
     var totalCost: Decimal { lines.reduce(0) { $0 + $1.cost } }

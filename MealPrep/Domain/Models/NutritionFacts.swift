@@ -9,7 +9,7 @@
 ///
 /// Named `NutritionFacts` (not `Nutrition`) to avoid colliding with the
 /// UI-facing `Nutrition` goal-selection enum in `Featrues/Screens/MealPlan`.
-struct NutritionFacts: Sendable, Hashable {
+nonisolated struct NutritionFacts: Sendable, Hashable {
     var energyKcal: Double
     var proteins: Double
     var carbohydrates: Double

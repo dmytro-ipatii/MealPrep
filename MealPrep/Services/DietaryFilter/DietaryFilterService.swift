@@ -11,7 +11,7 @@
 /// Runs before candidate selection so the model physically cannot select an
 /// unsafe product, and again in `PlanValidator` as a backstop. When multiple
 /// dietary needs are active, rules compose as an intersection.
-enum DietaryFilterService {
+nonisolated enum DietaryFilterService {
 
     static func filter(_ products: [Product], for needs: Set<DietaryNeed>) -> [Product] {
         guard !needs.isEmpty else { return products }
