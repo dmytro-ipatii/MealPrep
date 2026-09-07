@@ -4,14 +4,16 @@
     {
       "layers" : [
         {
-          "fill" : {
-            "solid" : "extended-srgb:0.20392,0.78039,0.34902,1.00000"
-          },
-          "glass" : false,
-          "image-name" : "MealPrep.svg",
-          "name" : "MealPrep",
+          "glass-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : false
+            }
+          ],
+          "image-name" : "AppIcon.png",
+          "name" : "AppIcon",
           "position" : {
-            "scale" : 3.8,
+            "scale" : 0.87,
             "translation-in-points" : [
               0,
               0

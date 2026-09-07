@@ -8,20 +8,58 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(.mealBag)
-                .resizable()
-                .foregroundStyle(.tint)
-                .aspectRatio(1, contentMode: .fit)
+    @State private var storedPlan: MealPlan?
+    @State private var hasCheckedForStoredPlan = false
 
-            Text("Hello, world!")
-                .font(.dsTitle)
+    let configurationStore: ConfigurationStoring
+    let generator: MealPlanGenerator
+    let mealPlanRepository: MealPlanRepositoryProtocol
+
+    var body: some View {
+        Group {
+            if let storedPlan {
+                // Once a plan exists it becomes the app's home: later launches
+                // land here rather than back in onboarding.
+                WeeklyMealPlanFlowView(
+                    plan: storedPlan,
+                    configurationStore: configurationStore,
+                    generator: generator,
+                    mealPlanRepository: mealPlanRepository
+                )
+            } else {
+                OnboardingFlowView(
+                    configurationStore: configurationStore,
+                    generator: generator,
+                    mealPlanRepository: mealPlanRepository,
+                    onComplete: { storedPlan = mealPlanRepository.loadLatestPlan() }
+                )
+            }
         }
-        .padding()
+        .task {
+            // A plan generated in a previous session reopens straight away.
+            guard !hasCheckedForStoredPlan else { return }
+            hasCheckedForStoredPlan = true
+
+            #if DEBUG
+            // Lets the plan screens be launched directly for inspection,
+            // without spending a real generation run:
+            // xcrun simctl launch <device> <bundle id> -seedPreviewPlan
+            if ProcessInfo.processInfo.arguments.contains("-seedPreviewPlan") {
+                storedPlan = .preview
+                return
+            }
+            #endif
+
+            storedPlan = mealPlanRepository.loadLatestPlan()
+        }
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(
+        configurationStore: PreviewConfigurationStore(),
+        generator: MealPlanGenerator(client: PreviewMealPlanLLMClient()),
+        mealPlanRepository: PreviewMealPlanRepository()
+    )
+    .environment(ModalManager())
 }

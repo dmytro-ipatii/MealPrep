@@ -8,18 +8,41 @@
 import SwiftUI
 
 struct DSButtonView: View {
-    let label: String
-    var isLoading: Bool = false
-    var isDisabled: Bool = false
+    private let label: String
+    private let variant: DSButtonVariant
+    private var isLoading: Bool = false
+    private var isDisabled: Bool = false
 
-    let action: () -> Void
+    private let action: () -> Void
+
+    init(
+        label: String,
+        variant: DSButtonVariant = .primary,
+        isLoading: Bool = false,
+        isDisabled: Bool = false,
+        action: @escaping () -> Void
+    ) {
+        self.label = label
+        self.variant = variant
+        self.isLoading = isLoading
+        self.isDisabled = isDisabled
+        self.action = action
+    }
+
+    private var appearance: DSButtonAppearance {
+        variant.appearance
+    }
 
     private var isActionDisabled: Bool {
         isDisabled || isLoading
     }
 
     private var background: DSColor {
-        isDisabled ? DSColor.backgroundSecondary : DSColor.accent
+        isDisabled ? DSColor.backgroundSecondary : appearance.background
+    }
+
+    private var foreground: DSColor {
+        isDisabled ? DSColor.textQuaternary : appearance.foreground
     }
 
     var body: some View {
@@ -33,7 +56,7 @@ struct DSButtonView: View {
                     } else {
                         Text(label)
                             .font(.dsBody)
-                            .foregroundStyle(DSColor.white.value)
+                            .foregroundStyle(foreground.value)
                     }
 
                 }
@@ -48,25 +71,47 @@ struct DSButtonView: View {
     }
 }
 
-#Preview("Active") {
-    DSButtonView(label: "Create your meal plan", action: ({}))
-        .padding()
-}
+#Preview("Primary") {
+    VStack {
+        DSButtonView(label: "Create your meal plan", action: ({}))
 
-#Preview("Loading") {
-    DSButtonView(
-        label: "Create your meal plan",
-        isLoading: true,
-        action: ({})
-    )
+        DSButtonView(
+            label: "Create your meal plan",
+            isLoading: true,
+            action: ({})
+        )
+
+        DSButtonView(
+            label: "Create your meal plan",
+            isDisabled: true,
+            action: ({})
+        )
+    }
     .padding()
 }
 
-#Preview("Disabled") {
-    DSButtonView(
-        label: "Create your meal plan",
-        isDisabled: true,
-        action: ({})
-    )
+#Preview("Secondary") {
+    VStack {
+        DSButtonView(
+            label: "Create your meal plan",
+            variant: .secondary,
+            action: ({})
+        )
+
+        DSButtonView(
+            label: "Create your meal plan",
+            variant: .secondary,
+            isLoading: true,
+            action: ({})
+        )
+
+        DSButtonView(
+            label: "Create your meal plan",
+            variant: .secondary,
+            isDisabled: true,
+            action: ({})
+        )
+    }
     .padding()
 }
+

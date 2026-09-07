@@ -1,0 +1,133 @@
+# Xcode
+
+#
+
+# User-specific project settings
+
+xcuserdata/
+
+# Xcode workspace user data
+
+*.xcuserstate
+
+# Build products
+
+build/
+DerivedData/
+
+# Archives
+
+*.xcarchive
+
+# Xcode generated files
+
+*.moved-aside
+*.xcscmblueprint
+
+# Swift Package Manager
+
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# CocoaPods
+
+Pods/
+
+# Carthage
+
+Carthage/Build/
+
+# fastlane
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# macOS
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Logs
+
+*.log
+
+# Environment / secrets
+
+.env
+.env.*
+!.env.example
+
+# API keys and local configuration
+
+Secrets.swift
+Secrets.plist
+
+# Simulator
+
+*.simruntime
+
+# Swift / Xcode generated documentation
+
+*.doccarchive
+
+# Code coverage
+
+*.xcresult
+
+# SPM artifacts
+
+/.swiftpm/
+/.build/
+
+# Firebase / Google service configuration
+
+# Uncomment if these files contain environment-specific secrets
+
+# GoogleService-Info.plist
+
+# Local configuration
+
+*.local
+
+# IDE / editor files
+
+.idea/
+.vscode/
+
+# Tuist
+
+.tuist-cache/
+Derived/
+
+# XcodeGen
+
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Mint
+
+.mint/
+
+# Tuist / Xcode generated project files
+
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+
+# Secrets
+Secrets.xcconfig
