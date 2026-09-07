@@ -14,10 +14,15 @@ struct MealPlanStateProcessingView: View {
 
     var body: some View {
         VStack {
-            Image(.mealBag)
-                .resizable()
-                .aspectRatio(1, contentMode: .fit)
-                .frame(height: 200)
+            ZStack {
+                Image(.mealBag)
+                    .resizable()
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(height: 200)
+
+                EmojiWaterfallView()
+                    .frame(height: 200)
+            }
 
             Text(message)
                 .font(.dsBody)
